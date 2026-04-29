@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>上越教育大学附属中学校</title>
+    <style>
+        /* --- 基本設定 --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', sans-serif;
+            background-color: #000;
+            color: #333;
+            overflow: hidden;
+            transition: background 0.3s ease;
+        }
+        body.club-mode {
+            background-image: url('club.png');
+            background-size: cover;
+            background-position: center;
+        }
+
+        /* --- 背景スライドショー --- */
+        .slideshow-container {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: -1; background-color: #000;
+            transition: opacity 0.4s;
+        }
+        .slideshow-container img {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: cover; opacity: 0; transition: opacity 1.2s ease-in-out;
+        }
+        .slideshow-container img.active { opacity: 1; }
+        .hide-slideshow { opacity: 0; pointer-events: none; }
+
+        /* --- ヘッダー --- */
+        header {
+            display: flex; flex-direction: column; align-items: center;
+            padding: 10px; position: fixed; width: 100%; top: 0; left: 0; z-index: 1000;
+            background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(128, 0, 0, 0.2);
+        }
+        .logo { font-size: 1.1rem; font-weight: bold; color: #800000; cursor: pointer; margin-bottom: 8px; }
+        nav ul { display: flex; flex-wrap: wrap; list-style: none; gap: 4px; justify-content: center; }
+        nav ul li a { 
+            text-decoration: none; color: #800000; font-weight: 700; font-size: 0.7rem; 
+            padding: 6px 8px; display: block; border-radius: 4px; cursor: pointer;
+        }
+        @media (min-width: 768px) {
+            header { flex-direction: row; justify-content: space-between; padding: 15px 50px; }
+            .logo { font-size: 1.3rem; margin-bottom: 0; }
+            nav ul { gap: 8px; }
+            nav ul li a { font-size: 0.8rem; }
+        }
+
+        /* --- 詳細表示エリア --- */
+        #detail-container {
+            max-height: 0; overflow: hidden; opacity: 0;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 15px; transition: opacity 0.4s ease, max-height 0.4s ease;
+            position: absolute; top: 90px; left: 50%; transform: translateX(-50%);
+            width: 96%; max-width: 1100px; z-index: 100;
+        }
+        #detail-container.active { 
+            max-height: 82vh; opacity: 1; 
+            padding: 45px 10px 15px; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.4); 
+            overflow-y: auto;
+        }
+        .close-btn { position: absolute; top: 10px; right: 20px; font-size: 2rem; cursor: pointer; color: #800000; z-index: 110; }
+
+        .pdf-embed-container { width: 100%; height: 70vh; border-radius: 8px; overflow: hidden; background: #f0f0f0; }
+        .pdf-embed-container iframe { width: 100%; height: 100%; border: none; }
+
+        .grid-3 { display: grid; grid-template-columns: 1fr; gap: 15px; }
+        @media (min-width: 768px) { .grid-3 { grid-template-columns: 1fr 1fr 1fr; } }
+
+        /* --- 下部パネル（収納機能付き） --- */
+        .mega-glass-panel {
+            position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+            width: 100%; background: rgba(255, 255, 255, 0.65); 
+            backdrop-filter: blur(15px); border-radius: 20px 20px 0 0; z-index: 10;
+            display: grid; grid-template-columns: 1fr; padding: 20px 10px 10px;
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        /* 収納状態のクラス */
+        .mega-glass-panel.collapsed { transform: translateX(-50%) translateY(calc(100% - 30px)); }
+        /* 詳細表示時の完全隠蔽 */
+        .is-detail .mega-glass-panel { transform: translateX(-50%) translateY(105%); }
+
+        /* 収納用トグルボタン */
+        .panel-toggle {
+            position: absolute; top: 5px; right: 20px;
+            width: 40px; height: 25px; background: rgba(128, 0, 0, 0.1);
+            border-radius: 12px; cursor: pointer; display: flex;
+            align-items: center; justify-content: center; color: #800000;
+            font-size: 0.8rem; transition: 0.3s;
+        }
+        .panel-toggle:hover { background: rgba(128, 0, 0, 0.2); }
+
+        .column { padding: 5px 15px; }
+        .column h2 { font-size: 0.85rem; color: #800000; margin-bottom: 5px; border-left: 4px solid #800000; padding-left: 8px; font-weight: bold; }
+        .column p { font-size: 0.75rem; color: #333; line-height: 1.6; }
+
+        @media (min-width: 768px) {
+            .mega-glass-panel { width: 95%; max-width: 1200px; grid-template-columns: 1fr 1fr 1fr; height: 130px; }
+            .column { border-left: 1px solid rgba(128, 0, 0, 0.15); }
+            .column:first-child { border-left: none; }
+        }
+    </style>
+</head>
+<body id="main-body">
+
+    <div class="slideshow-container" id="slideshow">
+        <img src="home1.JPG" class="active">
+         /* 画像を入れると暗転入れ替え */
+        </div>
+
+    <header>
+        <div class="logo" onclick="resetPage()">上越教育大学附属中学校</div>
+        <nav>
+            <ul>
+                <li><a onclick="changeContent('部活動紹介')">部活動</a></li>
+                <li><a onclick="changeContent('研究紹介')">研究紹介</a></li>
+                <li><a onclick="changeContent('年間予定')">年間予定</a></li>
+                <li><a onclick="changeContent('PTA関連')">PTA関連</a></li>
+                <li><a onclick="changeContent('証明書')">証明書</a></li>
+                <li><a onclick="changeContent('いじめ防止')">いじめ防止</a></li>
+                <li><a onclick="changeContent('同窓会')">同窓会</a></li>
+                <li><a onclick="changeContent('アクセス')">アクセス</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <main class="main-visual">
+        <div class="content-overlay">
+            <div id="detail-container">
+                <span class="close-btn" onclick="resetPage()">×</span>
+                <div id="detail-content"></div>
+            </div>
+        </div>
+    </main>
+
+    <section class="mega-glass-panel" id="bottom-panel">
+        <div class="panel-toggle" id="panel-toggle" onclick="togglePanel()">▼</div>
+        <div class="column">
+            <h2>お知らせ</h2>
+            <p>ＨＰのデザインを更新しました。</p>
+        </div>
+        <div class="column">
+            <h2>研究会情報</h2>
+            <p>学校だより12月号を掲載しました。</p>
+        </div>
+        <div class="column" style="display:flex; justify-content:center; align-items:center;">
+            <a href="https://www.facebook.com/fuzokuma/" target="_blank" onclick="event.stopPropagation();">
+                <img src="Facebook.png" alt="Facebook" style="max-height:60px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));">
+            </a>
+        </div>
+    </section>
+
+    <script>
+        let currentSlide = 0;
+        let slideInterval;
+        const slides = document.querySelectorAll('#slideshow img');
+        let isTransitioning = false;
+
+        function startSlideshow() {
+            if (slideInterval) clearInterval(slideInterval);
+            slideInterval = setInterval(() => {
+                if (slides.length > 0) {
+                    slides[currentSlide].classList.remove('active');
+                    currentSlide = (currentSlide + 1) % slides.length;
+                    slides[currentSlide].classList.add('active');
+                }
+            }, 5000);
+        }
+        startSlideshow();
+
+        // パネルの開閉
+        function togglePanel() {
+            const panel = document.getElementById('bottom-panel');
+            const toggleBtn = document.getElementById('panel-toggle');
+            panel.classList.toggle('collapsed');
+            toggleBtn.innerText = panel.classList.contains('collapsed') ? '▲' : '▼';
+        }
+
+        const detailData = {
+            'アクセス': '<div style="text-align:center;"><h2 style="color:#800000;margin-bottom:15px;border-bottom:2px solid #800000;display:inline-block;padding:0 20px 5px;font-size:1.2rem;">アクセス</h2><div class="grid-3"><img src="access1.png" style="width:100%;border-radius:8px;border:1px solid #ddd;"><div style="background:#fdf2f2;padding:15px;border-radius:8px;text-align:left;border-left:5px solid #800000;"><h3 style="color:#800000;font-size:1rem;margin-bottom:10px;">順路</h3><p style="color:#333;line-height:1.8;font-size:0.85rem;">◆ 高田駅から徒歩15分/タクシー5分<br>◆ 上越妙高駅からタクシー10分</p></div></div><img src="access2.png" style="max-width:100%;margin-top:20px;border:1px solid #ddd;border-radius:8px;"></div>',
+            '部活動紹介': '<div style="text-align:center;"><h2 style="color:#800000;margin-bottom:15px;border-bottom:2px solid #800000;display:inline-block;padding:0 20px 5px;font-size:1.2rem;">部活動紹介</h2><div class="grid-3"><div style="background:#fffafa;padding:15px;border-radius:10px;border:1px solid #ffcccc;text-align:left;"><h3 style="color:#800000;font-size:1rem;margin-bottom:10px;border-bottom:1px solid #ffcccc;">運動部</h3><p style="color:#333;font-size:0.85rem;line-height:1.6;">野球, 陸上, バスケ, サッカー, バレー, テニス</p></div><div style="background:#f0f7ff;padding:15px;border-radius:10px;border:1px solid #ccddee;text-align:left;"><h3 style="color:#800000;font-size:1rem;margin-bottom:10px;border-bottom:1px solid #ccddee;">文化部</h3><p style="color:#333;font-size:0.85rem;line-height:1.6;">科学, 美術, 吹奏楽</p></div><div style="background:#fdfdf0;padding:15px;border-radius:10px;border:1px solid #eeeecc;text-align:left;"><h3 style="color:#800000;font-size:1rem;margin-bottom:10px;border-bottom:1px solid #eeeecc;">特設部</h3><p style="color:#333;font-size:0.85rem;line-height:1.6;">合唱, 駅伝</p></div></div></div>',
+            '研究紹介': '<div style="text-align:center;"><h2 style="color:#800000;margin-bottom:20px;border-bottom:2px solid #800000;display:inline-block;padding:0 20px 5px;font-size:1.2rem;">研究紹介・各種案内</h2><div class="grid-3"><a href="https://www.youtube.com/watch?v=LEz4V01CZYI" target="_blank" onclick="event.stopPropagation();" style="text-decoration:none;background:#f9f9f9;padding:20px;border-radius:12px;color:#333;border:1px solid #ddd;display:block;"><span style="font-size:2rem;display:block;margin-bottom:10px;">🎥</span><b style="color:#800000;">学校紹介動画</b></a><a href="https://peatix.com/group/12779362" target="_blank" onclick="event.stopPropagation();" style="text-decoration:none;background:#f9f9f9;padding:20px;border-radius:12px;color:#333;border:1px solid #ddd;display:block;"><span style="font-size:2rem;display:block;margin-bottom:10px;">📝</span><b style="color:#800000;">研究会申し込み</b></a><a href="https://www.tokyo-shoseki.co.jp/product/books/81439/" target="_blank" onclick="event.stopPropagation();" style="text-decoration:none;background:#f9f9f9;padding:20px;border-radius:12px;color:#333;border:1px solid #ddd;display:block;"><span style="font-size:2rem;display:block;margin-bottom:10px;">📖</span><b style="color:#800000;">書籍販売</b></a></div></div>',
+            '証明書': '<div style="text-align:center;"><h2 style="color:#800000;margin-bottom:15px;border-bottom:2px solid #800000;display:inline-block;padding:0 20px 5px;font-size:1.2rem;">証明書発行</h2><div class="grid-3"><a href="https://drive.google.com/file/d/1Sjq7pHQEwdj17m3laiTcb5qMJvMfmfqM/view" target="_blank" onclick="event.stopPropagation();" style="text-decoration:none;background:#f9f9f9;padding:15px;border-radius:8px;color:#800000;font-weight:bold;border:1px solid #eee;">感染症証明書</a><a href="https://drive.google.com/file/d/1mXjA5uX7YFh2CweBd8Ul1r2cqrfXH3Et/view" target="_blank" onclick="event.stopPropagation();" style="text-decoration:none;background:#f9f9f9;padding:15px;border-radius:8px;color:#800000;font-weight:bold;border:1px solid #eee;">学割発行願</a><a href="https://drive.google.com/file/d/1rS1goSwkjbQX8_SpwgQPlEEYitdH7Xdo/view" target="_blank" onclick="event.stopPropagation();" style="text-decoration:none;background:#f9f9f9;padding:15px;border-radius:8px;color:#800000;font-weight:bold;border:1px solid #eee;">通学証明書</a></div></div>',
+            '年間予定': '<div class="pdf-embed-container"><iframe src="https://drive.google.com/file/d/1h5ZSRh9P5ff1IeqNPm3ZoP7OXqi2-Azj/preview"></iframe></div>',
+            'PTA関連': '<div class="pdf-embed-container"><iframe src="https://drive.google.com/file/d/1b56LIpnUQjwR1gXjn2TVCBtcfblr1737/preview"></iframe></div>',
+            'いじめ防止': '<div class="pdf-embed-container"><iframe src="https://drive.google.com/file/d/1Lz7SMT7aAxcKmIppdnsgCKtX2EW672xa/preview"></iframe></div>',
+            '同窓会': '<div class="pdf-embed-container"><iframe src="https://drive.google.com/file/d/1YTOoCP2WPapnkRhEw9XslW0OqaH_aGf6/preview"></iframe></div>'
+        };
+
+        function changeContent(title) {
+            if (isTransitioning) return;
+            isTransitioning = true;
+
+            const body = document.getElementById('main-body');
+            const slideshow = document.getElementById('slideshow');
+            const detailContainer = document.getElementById('detail-container');
+            const detailContent = document.getElementById('detail-content');
+
+            detailContainer.classList.remove('active');
+            detailContent.innerHTML = ""; 
+
+            setTimeout(() => {
+                if (title === '部活動紹介') {
+                    body.classList.add('club-mode');
+                    slideshow.classList.add('hide-slideshow');
+                    clearInterval(slideInterval);
+                } else {
+                    body.classList.remove('club-mode');
+                    slideshow.classList.remove('hide-slideshow');
+                    startSlideshow();
+                }
+
+                detailContent.innerHTML = detailData[title] || '準備中';
+                detailContainer.classList.add('active');
+                body.classList.add('is-detail'); // これで下部パネルが隠れる
+                
+                setTimeout(() => { isTransitioning = false; }, 400);
+            }, 50);
+        }
+
+        function resetPage() {
+            isTransitioning = false;
+            const body = document.getElementById('main-body');
+            const slideshow = document.getElementById('slideshow');
+            const detailContainer = document.getElementById('detail-container');
+            const detailContent = document.getElementById('detail-content');
+            
+            detailContainer.classList.remove('active');
+            body.classList.remove('is-detail', 'club-mode');
+            slideshow.classList.remove('hide-slideshow');
+            
+            setTimeout(() => {
+                detailContent.innerHTML = ""; 
+                startSlideshow();
+            }, 400);
+        }
+    </script>
+</body>
+</html>
