@@ -16,8 +16,12 @@
         }
         body.club-mode {
             background-image: url('Club.png');
-            background-size: cover;
-            background-position: center;
+            background-size: cover;          /* 画像を画面いっぱいに広げる */
+            background-position: center;      /* 画像の中心を画面の中央に合わせる */
+            background-repeat: no-repeat;     /* 画像を繰り返さない */
+            background-attachment: fixed;    /* スクロールしても背景を動かさない（任意） */
+            min-height: 100vh;               /* 画面の高さ分を最低限確保する */
+            margin: 0;                       /* 余計な隙間を消す */
         }
 
         /* --- 背景スライドショー --- */
